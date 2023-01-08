@@ -30,13 +30,13 @@ import static com.order.ecommerce.validator.Validator.productValidator;
 @RequiredArgsConstructor
 public class OrderService implements IOrderService {
 
-    protected final IOrderRepository orderRepository;
-    protected final IOrderItemRepository orderItemRepository;
-    protected final IPaymentRepository paymentRepository;
-    protected final IAddressRepository addressRepository;
+    private final IOrderRepository orderRepository;
+    private final IOrderItemRepository orderItemRepository;
+    private final IPaymentRepository paymentRepository;
+    private final IAddressRepository addressRepository;
 
-    protected final IProductService productService;
-    protected final OrderDetailsMapper orderDetailsMapper = Mappers.getMapper(OrderDetailsMapper.class);
+    private final IProductService productService;
+    private final OrderDetailsMapper orderDetailsMapper = Mappers.getMapper(OrderDetailsMapper.class);
 
     @Override
     @Transactional
