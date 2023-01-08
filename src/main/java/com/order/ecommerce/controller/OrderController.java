@@ -4,9 +4,13 @@ import com.order.ecommerce.dto.OrderResponseDto;
 import com.order.ecommerce.dto.OrderDto;
 import com.order.ecommerce.service.IOrderService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +31,7 @@ public class OrderController {
 
     /**
      * Creates order
+     *
      * @param orderDto
      * @return
      */
@@ -39,26 +44,28 @@ public class OrderController {
 
     /**
      * Finds Order by Id
+     *
      * @param orderId
      * @return
      */
     @GetMapping("/{orderId}")
     @Operation(summary = "Find order", description = "Find order by id")
-    public OrderDto findOrderBy(@PathVariable(name = "orderId") String orderId) {
-        validateArgument(orderId == null || orderId.isEmpty(), "order id cannot be null or empty");
-        return orderService.findOrderById(orderId);
+    public ResponseEntity<OrderDto> findOrderBy(@Parameter(in = ParameterIn.PATH, description = "order id", required=true, schema=@Schema()) @PathVariable(name = "orderId") Long orderId) {
+        OrderDto orderDto = orderService.findOrderById(orderId);
+        return orderDto == null ? ResponseEntity.notFound().build()  : ResponseEntity.ok(orderService.findOrderById(orderId));
     }
 
     /**
      * Updates order status
+     *
      * @param orderId
      * @param orderStatus
      */
     @PatchMapping("/{orderId}")
     @Operation(summary = "Update order status", description = "Update order status")
-    public void updateOrderStatus(@PathVariable("orderId") String orderId,
+    public void updateOrderStatus(@PathVariable("orderId") Long orderId,
                                   @RequestParam(name = "orderStatus") String orderStatus) {
-        validateArgument(orderId == null || orderId.isEmpty(), "order id cannot be null or empty");
+        validateArgument(orderId == null || orderId <= 0, "order id cannot be null or empty");
         validateArgument(orderStatus == null || orderStatus.isEmpty(), "order status cannot be null or empty");
         orderService.updateOrderStatus(orderId, orderStatus);
     }

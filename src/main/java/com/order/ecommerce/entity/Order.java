@@ -1,38 +1,46 @@
 package com.order.ecommerce.entity;
 
+import com.order.ecommerce.enums.OrderStatus;
+import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
 @Entity
+@Getter
+@SuperBuilder
+@Setter
+@NoArgsConstructor
 @Table(name = "ecommerce_order")
-public class Order implements Serializable {
+public class Order extends AbstractEntity {
 
-    @Id
-    @Column(name = "order_id", nullable = false, unique = true)
-    private String orderId;
-
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
     @Column(name = "order_status")
-    private String orderStatus;
+    private OrderStatus orderStatus = OrderStatus.PROCESSING;
 
     @Column(name = "customer_id")
     private String customerId;
 
-    @Column(name = "sub_total")
-    private double subTotal;
+    @Column(name = "sub_total", precision = 22, scale = 10)
+    private BigDecimal subTotal;
 
-    @Column(name = "total_amt")
-    private double totalAmt;
+    @Column(name = "total_amt", precision = 22, scale = 10)
+    private BigDecimal totalAmt;
 
-    @Column(name = "tax")
-    private double tax;
+    @Column(name = "tax", precision = 22, scale = 10)
+    private BigDecimal tax;
 
-    @Column(name = "shipping_charges")
-    private double shippingCharges;
+    @Column(name = "shipping_charges", precision = 22, scale = 10)
+    private BigDecimal shippingCharges;
 
     @Column(name = "title")
     private String title;
@@ -40,19 +48,16 @@ public class Order implements Serializable {
     @Column(name = "shipping_mode")
     private String shippingMode;
 
-    @Column(name = "created_at")
-    private LocalDate createdAt;
-
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(referencedColumnName = "payment_id", name = "payment_id")
+    @JoinColumn(referencedColumnName = "id", name = "payment_id")
     private Payment payment;
 
     @OneToOne
-    @JoinColumn(referencedColumnName = "address_id", name = "billing_address_id")
+    @JoinColumn(referencedColumnName = "id", name = "billing_address_id")
     private Address billingAddress;
 
     @OneToOne
-    @JoinColumn(referencedColumnName = "address_id", name = "shipping_address_id")
+    @JoinColumn(referencedColumnName = "id", name = "shipping_address_id")
     private Address shippingAddress;
 
     @OneToMany(targetEntity = OrderItem.class, fetch = FetchType.LAZY, mappedBy = "order")

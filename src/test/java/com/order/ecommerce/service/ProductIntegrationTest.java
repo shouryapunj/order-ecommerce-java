@@ -27,17 +27,17 @@ public class ProductIntegrationTest {
     @Test
     void testGetProduct() throws Exception {
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/api/v1/products/106")
+                        MockMvcRequestBuilders.get("/api/v1/products/1")
                 ).andExpect(status().is(200))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(
-                        content().json("{\n"
-                                + "                      \"productId\": \"106\",\n"
-                                + "                      \"sku\": \"1006\",\n"
-                                + "                      \"title\": \"SoftDrink\",\n"
-                                + "                      \"description\": \"Coke\",\n"
-                                + "                      \"price\": 5.99\n"
-                                + "                    }")
+                        content().json("{\n" +
+                                "  \"id\": 1,\n" +
+                                "  \"sku\": \"1001\",\n" +
+                                "  \"title\": \"protein\",\n" +
+                                "  \"description\": \"Whey\",\n" +
+                                "  \"price\": 1.99\n" +
+                                "}")
                 ).andReturn();
     }
 }

@@ -6,7 +6,7 @@ import com.order.ecommerce.dto.OrderDto;
 public interface IOrderService {
     OrderResponseDto createOrder(OrderDto orderDto);
 
-    OrderDto findOrderById(String id);
+    OrderDto findOrderById(Long id);
 
-    void updateOrderStatus(String id, String status);
+    void updateOrderStatus(Long id, String status);
 }

@@ -1,5 +1,7 @@
 package com.order.ecommerce.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.order.ecommerce.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,9 +14,9 @@ import javax.validation.constraints.NotNull;
 public class OrderResponseDto {
 
     @NotNull
-    private final String orderId;
+    private final Long id;
 
     @NotNull
-    private final String orderStatus;
+    private final OrderStatus orderStatus;
 
 }

@@ -7,7 +7,7 @@ import com.order.ecommerce.dto.AddressDto;
 import com.order.ecommerce.dto.ProductDto;
 import com.order.ecommerce.entity.*;
 import com.order.ecommerce.enums.OrderStatus;
-import com.order.ecommerce.enums.PaymentStatus;
+import com.order.ecommerce.exception.OrderNotFoundException;
 import com.order.ecommerce.mapper.OrderDetailsMapper;
 import com.order.ecommerce.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +16,10 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -42,7 +41,7 @@ public class OrderService implements IOrderService {
         log.info("Creating Order for customer = {}", orderDto.getCustomerId());
 
         log.info("Verifying all products exists before generating order");
-        List<String> productIds = orderDto.getOrderItems().stream().map(orderItemDto -> orderItemDto.getProductId()).distinct().collect(Collectors.toList());
+        List<Long> productIds = orderDto.getOrderItems().stream().map(OrderItemDto::getProductId).distinct().collect(Collectors.toList());
         List<ProductDto> products = productService.findAllById(productIds);
         if (products == null || products.isEmpty() || products.size() != productIds.size()) {
             log.info("Not all product(s) exist, failed to create order!");
@@ -50,28 +49,28 @@ public class OrderService implements IOrderService {
         }
 
         Order order = generateOrder(orderDto);
-        log.info("Generated order for orderId = {}", order.getOrderId());
+        log.info("Generated order for orderId = {}", order.getId());
 
         Order savedOrder = orderRepository.save(order);
-        String savedOrderId = savedOrder.getOrderId();
+        Long savedOrderId = savedOrder.getId();
         List<OrderItem> orderItemList = buildOrderItems(orderDto.getOrderItems(), savedOrderId);
         orderItemRepository.saveAll(orderItemList);
 
-        log.info("Successfully saved order & order items with id = {} for customer = {} on {}", savedOrder.getOrderId(),  savedOrder.getCustomerId(), savedOrder.getCreatedAt());
+        log.info("Successfully saved order & order items with id = {} for customer = {} on {}", savedOrder.getId(),  savedOrder.getCustomerId(), savedOrder.getCreatedAt());
 
         return OrderResponseDto.builder()
-                .orderId(savedOrderId)
+                .id(savedOrderId)
                 .orderStatus(savedOrder.getOrderStatus())
                 .build();
     }
 
     @Override
-    public OrderDto findOrderById(String orderId) {
+    public OrderDto findOrderById(Long orderId) {
         log.info("Finding order for orderId = {}", orderId);
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isEmpty()) {
             log.info("Cannot find order with id = {}", orderId);
-            return null;
+            throw new OrderNotFoundException(String.format("Order with id=%d does not exist",orderId));
         }
 
         log.info("Successfully found order for orderId = {}", orderId);
@@ -79,7 +78,7 @@ public class OrderService implements IOrderService {
     }
 
     @Override
-    public void updateOrderStatus(String orderId, String status) {
+    public void updateOrderStatus(Long orderId, String status) {
         OrderDto orderDto = findOrderById(orderId);
 
         if (orderDto == null) {
@@ -93,19 +92,21 @@ public class OrderService implements IOrderService {
             return;
         }
 
-        Order order = orderRepository.findById(orderId).get();
-        order.setOrderStatus(status.toUpperCase());
-        orderRepository.save(order);
-        log.info("Successfully updated order status to = {} for order id = {}", status.toUpperCase(), orderId);
+        Optional<Order> optionalOrder = orderRepository.findById(orderId);
+        if(optionalOrder.isPresent()) {
+            Order orderToBeUpdated = optionalOrder.get();
+            orderToBeUpdated.setOrderStatus(OrderStatus.valueOf(status));
+            orderRepository.save(optionalOrder.get());
+            log.info("Successfully updated order status to = {} for order id = {}", status.toUpperCase(), orderId);
+        } else{
+            log.error("Invalid Order Id={}", orderId);
+            throw new OrderNotFoundException(String.format("Order with Id=%d does not exist", orderId));
+        }
+
     }
 
     private Order generateOrder(OrderDto orderDto) {
         Order order = orderDetailsMapper.toOrderEntity(orderDto);
-        order.setOrderId(UUID.randomUUID().toString());
-        order.setCreatedAt(LocalDate.now());
-
-        order.setOrderStatus(OrderStatus.PROCESSING.name());
-
         Payment payment = buildAndSavePayment(orderDto.getAmount(), orderDto.getPaymentMode());
         order.setPayment(payment);
 
@@ -116,7 +117,7 @@ public class OrderService implements IOrderService {
         return order;
     }
 
-    private List<OrderItem> buildOrderItems(List<OrderItemDto> orderItemsDtoList, String orderId) {
+    private List<OrderItem> buildOrderItems(List<OrderItemDto> orderItemsDtoList, long orderId) {
         List<OrderItem> orderItemList = orderItemsDtoList
                 .stream()
                 .map(orderItemDto -> new OrderItem(new OrderItemPk(orderItemDto.getProductId(), orderId), null, null, orderItemDto.getQuantity()))
@@ -125,25 +126,19 @@ public class OrderService implements IOrderService {
         return (List<OrderItem>) orderItemRepository.saveAll(orderItemList);
     }
 
-    private Payment buildAndSavePayment(double amount, String paymentMode) {
-        Payment payment = new Payment(
-                UUID.randomUUID().toString(),
-                amount,
-                paymentMode,
-                UUID.randomUUID().toString(),
-                PaymentStatus.PROCESSING.name(),
-                LocalDate.now(),
-                null
-        );
-        log.info("Saving payment details for payment id = {}", payment.getPaymentId());
+    private Payment buildAndSavePayment(BigDecimal amount, String paymentMode) {
+        Payment payment = Payment.builder()
+                .amount(amount)
+                .paymentMode(paymentMode)
+                .order(null)
+        .build();
+        log.info("Saving payment details for payment id = {}", payment.getId());
         return paymentRepository.save(payment);
     }
 
     private Address buildAndLoadAddress(AddressDto addressDto) {
         Address addressEntity = orderDetailsMapper.toAddressEntity(addressDto);
-        addressEntity.setAddressId(UUID.randomUUID().toString());
-        addressEntity.setCreatedAt(LocalDate.now());
-        log.info("Saving billing/shipping address for address id = {}", addressEntity.getAddressId());
+        log.info("Saving billing/shipping address for address id = {}", addressEntity.getId());
         return addressRepository.save(addressEntity);
     }
 }

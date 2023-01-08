@@ -4,13 +4,14 @@ import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.util.Date;
 
 @Data
 @Builder
 public class ProductDto {
 
-    @NotNull
-    private final String productId;
+    private Long id;
 
     @NotNull
     private final String sku;
@@ -21,5 +22,5 @@ public class ProductDto {
     @NotNull
     private final String description;
 
-    private final double price;
+    private final BigDecimal price;
 }

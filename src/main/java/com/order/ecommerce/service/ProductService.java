@@ -20,20 +20,19 @@ import java.util.stream.Collectors;
 public class ProductService implements IProductService {
 
     private final IProductRepository productRepository;
-    private final ProductMapper productMapper = Mappers.getMapper(ProductMapper.class);
+    private final ProductMapper productMapper;
 
     @Override
     public ProductDto createProduct(ProductDto productDto) {
-        log.info("Creating Product with productId = {}", productDto.getProductId());
-        Product entity = productMapper.toProductEntity(productDto);
-        entity.setCreatedAt(LocalDate.now());
-        Product savedProduct = productRepository.save(entity);
-        log.info("Successfully saved product with id = {} on {}", savedProduct.getProductId(), savedProduct.getCreatedAt());
+        log.info("Creating Product with product = {}", productDto);
+        Product product = productMapper.toProductEntity(productDto);
+        Product savedProduct = productRepository.save(product);
+        log.info("Successfully saved product with id = {} on {}", savedProduct.getId(), savedProduct.getCreatedAt());
         return productMapper.toProductDto(savedProduct);
     }
 
     @Override
-    public ProductDto findProductById(String productId) {
+    public ProductDto findProductById(Long productId) {
         log.info("Finding product for productId = {}", productId);
         Optional<Product> product = productRepository.findById(productId);
         if (product.isEmpty()) {
@@ -46,7 +45,7 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public List<ProductDto> findAllById(List<String> ids) {
+    public List<ProductDto> findAllById(List<Long> ids) {
         log.info("Finding products for ids = {}", ids);
         List<Product> productList = (List<Product>) productRepository.findAllById(ids);
         if (productList == null || productList.isEmpty()) {

@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class OrderControllerTest {
     private static final OrderDto orderDtoRequest = OrderUtil.createTestOrder();
-    private static final OrderResponseDto mockOrderResponse = new OrderResponseDto("2e99fe21-2243-4004-9640-e992bbcc5040", "PROCESSING");
+    private static final OrderResponseDto mockOrderResponse = new OrderResponseDto(1L, OrderStatus.PROCESSING);
 
     @Mock
     private OrderService orderService;
@@ -37,17 +37,17 @@ class OrderControllerTest {
 
     @Test
     void testGetOrder() {
-        String orderId = "2e99fe21-2243-4004-9640-e992bbcc5040";
+        Long orderId = 1L;
         when(orderService.findOrderById(orderId)).thenReturn(orderDtoRequest);
 
-        OrderDto actualResponse = orderController.findOrderBy(orderId);
+        OrderDto actualResponse = orderController.findOrderBy(orderId).getBody();
 
         assertThat(actualResponse).isEqualTo(orderDtoRequest);
     }
 
     @Test
     void testPatchOrder() {
-        String orderId = "2e99fe21-2243-4004-9640-e992bbcc5040";
+        Long orderId = 1L;
 
         orderController.updateOrderStatus(orderId, OrderStatus.CANCELLED.name());
 

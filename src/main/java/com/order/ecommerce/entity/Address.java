@@ -1,6 +1,10 @@
 package com.order.ecommerce.entity;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -11,14 +15,13 @@ import javax.persistence.FetchType;
 import java.io.Serializable;
 import java.time.LocalDate;
 
-@Data
 @Entity
+@Getter
+@SuperBuilder
+@Setter
+@NoArgsConstructor
 @Table(name = "ecommerce_address")
-public class Address implements Serializable {
-
-    @Id
-    @Column(name = "address_id", nullable = false, unique = true)
-    private String addressId;
+public class Address extends AbstractEntity {
 
     @Column(name = "address1", nullable = false)
     private String address1;
@@ -40,9 +43,6 @@ public class Address implements Serializable {
 
     @Column(name = "phone", nullable = false)
     private String phone;
-
-    @Column(name = "createdAt", nullable = false)
-    private LocalDate createdAt;
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "billingAddress")
     private Order order;

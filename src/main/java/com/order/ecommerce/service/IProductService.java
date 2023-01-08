@@ -8,7 +8,7 @@ public interface IProductService {
 
     ProductDto createProduct(ProductDto productDto);
 
-    ProductDto findProductById(String productId);
+    ProductDto findProductById(Long productId);
 
-    List<ProductDto> findAllById(List<String> ids);
+    List<ProductDto> findAllById(List<Long> ids);
 }

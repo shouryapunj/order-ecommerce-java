@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,31 +25,33 @@ public class ProductController {
 
     /**
      * Creates a product
+     *
      * @param productDto
      * @return
      */
     @PostMapping
     @Operation(summary = "Create a product", description = "Create a product")
-    public ProductDto createProduct(@RequestBody ProductDto productDto) {
+    public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto) {
         validateArgument(productDto);
-        return productService.createProduct(productDto);
+        return ResponseEntity.ok(productService.createProduct(productDto));
     }
 
     /**
      * Finds product by id
+     *
      * @param productId
      * @return
      */
     @GetMapping("/{productId}")
     @Operation(summary = "Find a product", description = "Find a product by id")
-    public ProductDto findProductById(@PathVariable(name = "productId") String productId) {
-        validateArgument(productId == null || productId.isEmpty(), "Product Id cannot be null or empty");
-        return productService.findProductById(productId);
+    public ResponseEntity<ProductDto> findProductById(@PathVariable(name = "productId") Long productId) {
+        ProductDto productDto = productService.findProductById(productId);
+        return productDto == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(productDto);
     }
 
     private void validateArgument(ProductDto productDto) {
         validateArgument(productDto == null, "Product cannot be null");
-        validateArgument(productDto.getProductId() == null || productDto.getProductId().isEmpty(), "Product Id cannot be null or empty");
+        //validateArgument(productDto.getId() == null || productDto.getId() == 0, "Product Id cannot be null or empty");
         validateArgument(productDto.getSku() == null || productDto.getSku().isEmpty(), "Product Sku cannot be null or empty");
         validateArgument(productDto.getTitle() == null || productDto.getTitle().isEmpty(), "Product Title cannot be null");
         validateArgument(productDto.getDescription() == null || productDto.getDescription().isEmpty(), "Product Description cannot be empty");

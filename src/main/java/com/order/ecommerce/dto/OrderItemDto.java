@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 public class OrderItemDto {
 
     @NotNull
-    private final String productId;
+    private final Long productId;
     @NotNull
     private final String quantity;
 }

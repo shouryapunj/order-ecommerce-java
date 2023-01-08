@@ -16,12 +16,14 @@ public interface OrderDetailsMapper {
     @Mapping(source = "payment.paymentMode", target = "paymentMode")
     OrderDto toOrderDto(Order order);
 
-    @Mapping(target = "orderId", ignore = true)
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "payment", ignore = true)
+    @Mapping(target = "version", ignore = true)
     Order toOrderEntity(OrderDto orderDto);
 
-    @Mapping(source = "product.productId", target = "productId")
+    @Mapping(source = "product.id", target = "productId")
     OrderItemDto toOrderItemDto(OrderItem orderItem);
 
     @Mapping(target = "orderItemPk", ignore = true)
@@ -29,9 +31,11 @@ public interface OrderDetailsMapper {
     @Mapping(target = "order", ignore = true)
     OrderItem toOrderItemEntity(OrderItemDto orderItemDto);
 
-    @Mapping(target = "addressId", ignore = true)
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "order", ignore = true)
+    @Mapping(target = "version", ignore = true)
     Address toAddressEntity(AddressDto addressDto);
 
     AddressDto toAddressDto(Address address);
