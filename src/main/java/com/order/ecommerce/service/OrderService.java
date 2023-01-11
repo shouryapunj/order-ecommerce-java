@@ -8,6 +8,8 @@ import com.order.ecommerce.dto.ProductDto;
 import com.order.ecommerce.entity.*;
 import com.order.ecommerce.enums.OrderStatus;
 import com.order.ecommerce.enums.PaymentStatus;
+import com.order.ecommerce.exceptions.NoOrderFoundException;
+import com.order.ecommerce.exceptions.NoProductFoundException;
 import com.order.ecommerce.mapper.OrderDetailsMapper;
 import com.order.ecommerce.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +44,7 @@ public class OrderService implements IOrderService {
         log.info("Creating Order for customer = {}", orderDto.getCustomerId());
 
         log.info("Verifying all products exists before generating order");
-        List<String> productIds = orderDto.getOrderItems().stream().map(orderItemDto -> orderItemDto.getProductId()).distinct().collect(Collectors.toList());
+        List<String> productIds = orderDto.getOrderItems().stream().map(OrderItemDto::getProductId).distinct().collect(Collectors.toList());
         List<ProductDto> products = productService.findAllById(productIds);
         if (products == null || products.isEmpty() || products.size() != productIds.size()) {
             log.info("Not all product(s) exist, failed to create order!");
@@ -71,7 +73,7 @@ public class OrderService implements IOrderService {
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isEmpty()) {
             log.info("Cannot find order with id = {}", orderId);
-            return null;
+            throw new NoOrderFoundException("Can't find order with id "+orderId);
         }
 
         log.info("Successfully found order for orderId = {}", orderId);
