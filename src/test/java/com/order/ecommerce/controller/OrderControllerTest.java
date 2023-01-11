@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import com.order.ecommerce.dto.OrderDto;
 import com.order.ecommerce.dto.OrderResponseDto;
 import com.order.ecommerce.enums.OrderStatus;
+import com.order.ecommerce.exceptions.NoProductFoundException;
 import com.order.ecommerce.service.OrderService;
 import com.order.ecommerce.util.OrderUtil;
 import org.junit.jupiter.api.Test;

@@ -2,6 +2,7 @@ package com.order.ecommerce.service;
 
 import com.order.ecommerce.dto.ProductDto;
 import com.order.ecommerce.entity.Product;
+import com.order.ecommerce.exceptions.NoProductFoundException;
 import com.order.ecommerce.mapper.ProductMapper;
 import com.order.ecommerce.repository.IProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class ProductService implements IProductService {
         Optional<Product> product = productRepository.findById(productId);
         if (product.isEmpty()) {
             log.info("Cannot find product with id = {}", productId);
-            return null;
+            throw new NoProductFoundException("Cannot find the product with id "+productId);
         }
 
         log.info("Successfully found product for productId = {}", productId);
@@ -51,7 +52,7 @@ public class ProductService implements IProductService {
         List<Product> productList = (List<Product>) productRepository.findAllById(ids);
         if (productList == null || productList.isEmpty()) {
             log.info("No product(s) found for ids = {}", ids);
-            return null;
+            throw new NoProductFoundException("Connot find the product with ids ");
         }
         log.info("Successfully found {} products", productList.size());
         return productList.stream().map(product -> productMapper.toProductDto(product)).collect(Collectors.toList());
